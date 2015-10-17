@@ -1,24 +1,37 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 
 First I load the dplyr and ggplot2 libraries
 
-```{r, echo=TRUE, warning=FALSE}
+
+```r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 library(ggplot2)
 ```
 
 Then I Load the csv file ubicated in my work directory, later I give the right 
 format to Date column
 
-```{r, echo=TRUE, warning=FALSE}
+
+```r
 activity <- read.csv("activity.csv", stringsAsFactors = F)
 activity$date <- as.Date(activity$date)
 ```
@@ -29,7 +42,8 @@ activity$date <- as.Date(activity$date)
 I use dply to calculate the total steps per day later I plot the histogram and 
 calculate the mean and median.
 
-```{r, echo=TRUE, warning=FALSE}
+
+```r
 Activity_Day <- activity %>% group_by(date) %>% 
         summarize(steps = sum(steps, na.rm = T))
 
@@ -47,14 +61,17 @@ ggplot(Activity_Day, aes(x = date, y = steps)) +
         xlab("Date") + ylab("Total Steps") + ggtitle("Steps by day")
 ```
 
-The mean of total steps is `r Activity_Mean` and the median is 
-`r Activity_Median`
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
+The mean of total steps is 9354.2295082 and the median is 
+10395
 
 ## What is the average daily activity pattern?
 
 I calculate the mean steps per interval later I plot the line representing it
 
-```{r, echo=TRUE, warning=FALSE}
+
+```r
 Activity_Interval <- activity %>% group_by(interval) %>% 
         summarize(meansteps = mean(steps, na.rm = T))
 
@@ -63,19 +80,23 @@ ggplot(Activity_Interval, aes(x = interval, y = meansteps)) +
         xlab("Interval") + ylab("Total Steps") + ggtitle("Steps per interval")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
 ## Imputing missing values
 
 Calculate the total of NAs values
 
-```{r, echo=TRUE, warning=FALSE}
+
+```r
 Null_values <- sum(is.na(activity))
 ```
 
-The total of NAs value is `r Null_values`.
+The total of NAs value is 2304.
 
 Then I filled the NAs using a new dataframe: new_activity.
 
-```{r, echo=TRUE, warning=FALSE}
+
+```r
 new_activity <- merge(activity, Activity_Interval, by="interval")
 
 new_activity[is.na(new_activity$steps), 2] <- new_activity[is.na(new_activity$steps), 4]
@@ -92,7 +113,9 @@ ggplot(Activity_Day2, aes(x = date, y = steps)) +
         ggtitle("Steps per day with NAs filled")
 ```
 
-The mean of total steps is `r Activity_Mean2` and the median is 
-`r Activity_Median2` with NAs filled
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+
+The mean of total steps is 1.0766189\times 10^{4} and the median is 
+1.0766189\times 10^{4} with NAs filled
 
 ## Are there differences in activity patterns between weekdays and weekends?
