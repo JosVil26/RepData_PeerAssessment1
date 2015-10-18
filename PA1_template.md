@@ -1,34 +1,23 @@
-# Reproducible Research: Peer Assessment 1
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
 
 
 ## Loading and preprocessing the data
 
-First I load the dplyr and ggplot2 libraries
+First I load the **dplyr** and **ggplot2** libraries.
 
 
 ```r
 library(dplyr)
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-## 
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-## 
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 library(ggplot2)
 ```
 
-Then I Load the csv file ubicated in my work directory, later I give the right 
-format to Date column
+Then I load the csv file ubicated in my work directory, later I give the right 
+format to Date column.
 
 
 ```r
@@ -58,17 +47,17 @@ ggplot(Activity_Day, aes(x = date, y = steps)) +
         geom_hline(yintercept = Activity_Median) + 
         annotate("text", min(Activity_Day$date), Activity_Median + 500, 
                  label = "Median") + 
-        xlab("Date") + ylab("Total Steps") + ggtitle("Steps by day")
+        xlab("Date") + ylab("Total Steps") + ggtitle("Steps per day")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
 
 The mean of total steps is 9354.2295082 and the median is 
-10395
+10395.
 
 ## What is the average daily activity pattern?
 
-I calculate the mean steps per interval later I plot the line representing it
+I calculate the mean steps per interval later I plot the line representing it.
 
 
 ```r
@@ -80,11 +69,11 @@ ggplot(Activity_Interval, aes(x = interval, y = meansteps)) +
         xlab("Interval") + ylab("Total Steps") + ggtitle("Steps per interval")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
 
 ## Imputing missing values
 
-Calculate the total of NAs values
+Calculate the total of NAs values.
 
 
 ```r
@@ -93,13 +82,16 @@ Null_values <- sum(is.na(activity))
 
 The total of NAs value is 2304.
 
-Then I filled the NAs using a new dataframe: new_activity.
+Then I filled the NAs using a new dataframe: **new_activity**. The strategy 
+that I use for filled the NAs is taking the mean steps per interval and put 
+them in place of NAs.
 
 
 ```r
 new_activity <- merge(activity, Activity_Interval, by="interval")
 
-new_activity[is.na(new_activity$steps), 2] <- new_activity[is.na(new_activity$steps), 4]
+new_activity[is.na(new_activity$steps), 2] <- 
+        new_activity[is.na(new_activity$steps), 4]
 
 Activity_Day2 <- new_activity %>% group_by(date) %>% 
         summarize(steps = sum(steps, na.rm = T))
@@ -113,9 +105,48 @@ ggplot(Activity_Day2, aes(x = date, y = steps)) +
         ggtitle("Steps per day with NAs filled")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
 
-The mean of total steps is 1.0766189\times 10^{4} and the median is 
-1.0766189\times 10^{4} with NAs filled
+The mean of total steps is 1.0766189 &times; 10<sup>4</sup> and the median is 
+1.0766189 &times; 10<sup>4</sup> with NAs filled. The new values are different from the 
+first exercise, is not a great difference but they converge now, the histogram 
+has changes in the days with NAs values but they are minimun.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+First of all, I create a new variable **typeday** to classified days as weekday 
+or weekend.
+
+
+```r
+Sys.setlocale("LC_ALL","English")
+```
+
+```
+## [1] "LC_COLLATE=English_United States.1252;LC_CTYPE=English_United States.1252;LC_MONETARY=English_United States.1252;LC_NUMERIC=C;LC_TIME=English_United States.1252"
+```
+
+```r
+new_activity <- new_activity %>% mutate(weekday = weekdays(date))
+new_activity <- new_activity %>% mutate(typeday = grepl("^S", weekday))
+new_activity$typeday <- gsub('TRUE', 'weekend', new_activity$typeday)
+new_activity$typeday <- gsub('FALSE', 'weekday', new_activity$typeday)
+new_activity$typeday <- as.factor(new_activity$typeday)
+Activity_Interval_TypeDay <- new_activity %>% group_by(interval, typeday) %>% 
+        summarize(meansteps = mean(steps, na.rm = T))
+```
+
+Then I use lattice library for create the plot.
+
+
+```r
+library(lattice)
+xyplot(meansteps ~ interval | typeday, data = Activity_Interval_TypeDay, 
+       type = "l", layout = c(1, 2), xlab = "Interval", 
+       ylab = "Number of steps")
+```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
+
+The graphic show us that there isn't many differences in activity patterns 
+between weekdays and weekends.

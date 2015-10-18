@@ -8,17 +8,17 @@ output:
 
 ## Loading and preprocessing the data
 
-First I load the dplyr and ggplot2 libraries
+First I load the **dplyr** and **ggplot2** libraries.
 
-```{r, echo=TRUE, warning=FALSE}
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
 library(dplyr)
 library(ggplot2)
 ```
 
-Then I Load the csv file ubicated in my work directory, later I give the right 
-format to Date column
+Then I load the csv file ubicated in my work directory, later I give the right 
+format to Date column.
 
-```{r, echo=TRUE, warning=FALSE}
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
 activity <- read.csv("activity.csv", stringsAsFactors = F)
 activity$date <- as.Date(activity$date)
 ```
@@ -29,7 +29,7 @@ activity$date <- as.Date(activity$date)
 I use dply to calculate the total steps per day later I plot the histogram and 
 calculate the mean and median.
 
-```{r, echo=TRUE, warning=FALSE}
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
 Activity_Day <- activity %>% group_by(date) %>% 
         summarize(steps = sum(steps, na.rm = T))
 
@@ -44,17 +44,17 @@ ggplot(Activity_Day, aes(x = date, y = steps)) +
         geom_hline(yintercept = Activity_Median) + 
         annotate("text", min(Activity_Day$date), Activity_Median + 500, 
                  label = "Median") + 
-        xlab("Date") + ylab("Total Steps") + ggtitle("Steps by day")
+        xlab("Date") + ylab("Total Steps") + ggtitle("Steps per day")
 ```
 
 The mean of total steps is `r Activity_Mean` and the median is 
-`r Activity_Median`
+`r Activity_Median`.
 
 ## What is the average daily activity pattern?
 
-I calculate the mean steps per interval later I plot the line representing it
+I calculate the mean steps per interval later I plot the line representing it.
 
-```{r, echo=TRUE, warning=FALSE}
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
 Activity_Interval <- activity %>% group_by(interval) %>% 
         summarize(meansteps = mean(steps, na.rm = T))
 
@@ -65,20 +65,23 @@ ggplot(Activity_Interval, aes(x = interval, y = meansteps)) +
 
 ## Imputing missing values
 
-Calculate the total of NAs values
+Calculate the total of NAs values.
 
-```{r, echo=TRUE, warning=FALSE}
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
 Null_values <- sum(is.na(activity))
 ```
 
 The total of NAs value is `r Null_values`.
 
-Then I filled the NAs using a new dataframe: new_activity.
+Then I filled the NAs using a new dataframe: **new_activity**. The strategy 
+that I use for filled the NAs is taking the mean steps per interval and put 
+them in place of NAs.
 
-```{r, echo=TRUE, warning=FALSE}
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
 new_activity <- merge(activity, Activity_Interval, by="interval")
 
-new_activity[is.na(new_activity$steps), 2] <- new_activity[is.na(new_activity$steps), 4]
+new_activity[is.na(new_activity$steps), 2] <- 
+        new_activity[is.na(new_activity$steps), 4]
 
 Activity_Day2 <- new_activity %>% group_by(date) %>% 
         summarize(steps = sum(steps, na.rm = T))
@@ -93,6 +96,34 @@ ggplot(Activity_Day2, aes(x = date, y = steps)) +
 ```
 
 The mean of total steps is `r Activity_Mean2` and the median is 
-`r Activity_Median2` with NAs filled
+`r Activity_Median2` with NAs filled. The new values are different from the 
+first exercise, is not a great difference but they converge now, the histogram 
+has changes in the days with NAs values but they are minimun.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+First of all, I create a new variable **typeday** to classified days as weekday 
+or weekend.
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+Sys.setlocale("LC_ALL","English")
+new_activity <- new_activity %>% mutate(weekday = weekdays(date))
+new_activity <- new_activity %>% mutate(typeday = grepl("^S", weekday))
+new_activity$typeday <- gsub('TRUE', 'weekend', new_activity$typeday)
+new_activity$typeday <- gsub('FALSE', 'weekday', new_activity$typeday)
+new_activity$typeday <- as.factor(new_activity$typeday)
+Activity_Interval_TypeDay <- new_activity %>% group_by(interval, typeday) %>% 
+        summarize(meansteps = mean(steps, na.rm = T))
+```
+
+Then I use lattice library for create the plot.
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+library(lattice)
+xyplot(meansteps ~ interval | typeday, data = Activity_Interval_TypeDay, 
+       type = "l", layout = c(1, 2), xlab = "Interval", 
+       ylab = "Number of steps")
+```
+
+The graphic show us that there isn't many differences in activity patterns 
+between weekdays and weekends.
