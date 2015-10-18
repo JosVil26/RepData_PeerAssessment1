@@ -63,6 +63,19 @@ ggplot(Activity_Interval, aes(x = interval, y = meansteps)) +
         xlab("Interval") + ylab("Total Steps") + ggtitle("Steps per interval")
 ```
 
+I obtain the interval with the max number of steps.
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+max_value <- max(Activity_Interval$meansteps)
+max_interval <- Activity_Interval[Activity_Interval$meansteps == 
+                                          max(Activity_Interval$meansteps), 1]
+max_hour <- max_interval%/%100
+max_minute <- max_interval%%100
+```
+
+The interval with the max value is `r max_interval` with the value of 
+`r max_value`. The interval represent the time: `r max_hour`:`r max_minute`.
+
 ## Imputing missing values
 
 Calculate the total of NAs values.

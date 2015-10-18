@@ -71,6 +71,20 @@ ggplot(Activity_Interval, aes(x = interval, y = meansteps)) +
 
 ![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
 
+I obtain the interval with the max number of steps.
+
+
+```r
+max_value <- max(Activity_Interval$meansteps)
+max_interval <- Activity_Interval[Activity_Interval$meansteps == 
+                                          max(Activity_Interval$meansteps), 1]
+max_hour <- max_interval%/%100
+max_minute <- max_interval%%100
+```
+
+The interval with the max value is 835 with the value of 
+206.1698113. The interval represent the time: 8:35.
+
 ## Imputing missing values
 
 Calculate the total of NAs values.
@@ -105,7 +119,7 @@ ggplot(Activity_Day2, aes(x = date, y = steps)) +
         ggtitle("Steps per day with NAs filled")
 ```
 
-![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png) 
 
 The mean of total steps is 1.0766189 &times; 10<sup>4</sup> and the median is 
 1.0766189 &times; 10<sup>4</sup> with NAs filled. The new values are different from the 
@@ -146,7 +160,7 @@ xyplot(meansteps ~ interval | typeday, data = Activity_Interval_TypeDay,
        ylab = "Number of steps")
 ```
 
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
 
 The graphic show us that there isn't many differences in activity patterns 
 between weekdays and weekends.
